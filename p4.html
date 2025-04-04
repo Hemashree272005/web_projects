@@ -3,377 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzle Slider Game</title>
+    <title>Life is a Cycle Emoji</title>
+    <style>
+        body {
+            display: flex; flex-direction: column; 
+            justify-content: center; align-items: center;
+            min-height: 100vh; background-color: #f0f0f0; font-family: sans-serif;
+            padding-top: 20px; 
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px; 
+            font-weight: 600;
+        }
+        .instruction-text {
+            color: #555;
+            margin-bottom: 15px; /* Space below instructions */
+        }
+        /* Increased container size to hold bigger emoji */
+        .emoji-container { position: relative; width: 200px; height: 200px; margin-bottom: 15px;}
+        .emoji-container input[type="radio"] { position: absolute; opacity: 0; pointer-events: none;}
+        .emoji-container label {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out; z-index: 1;
+        }
+        .emoji {
+            font-size: 160px; /* Doubled font size */
+            display: inline-block; line-height: 1;
+            /* Faster, bouncier transition for 'pop' */
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .sequence-text { font-size: 1.1em; color: #444; font-weight: bold; }
+
+        #s1:checked ~ #l1, #s2:checked ~ #l2, #s3:checked ~ #l3, #s4:checked ~ #l4 { opacity: 1; pointer-events: auto; z-index: 10; }
+        #s1:checked ~ #l1:hover .emoji, #s2:checked ~ #l2:hover .emoji,
+        #s3:checked ~ #l3:hover .emoji, #s4:checked ~ #l4:hover .emoji { transform: scale(1.4); } /* Bigger pop */
+
+        #s1:checked ~ #l2, #s2:checked ~ #l3, #s3:checked ~ #l4, #s4:checked ~ #l1 {
+             opacity: 1; pointer-events: auto; z-index: 11; /* Higher z-index for trigger */
+        }
+        #s1:checked ~ #l2 .emoji, #s2:checked ~ #l3 .emoji,
+        #s3:checked ~ #l4 .emoji, #s4:checked ~ #l1 .emoji { opacity: 0; }
+    </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="margin: 0; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Puzzle Slider</h1>
-        <p style="margin: 5px 0 15px; font-size: 1.1rem;">Rearrange the tiles to complete the image</p>
-        <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center;">
-            <button id="startBtn" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 30px; cursor: pointer; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;">Start New Game</button>
-            <div style="display: flex; align-items: center; background-color: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px;">
-                <span style="margin-right: 10px;">Difficulty:</span>
-                <select id="difficultySelect" style="padding: 5px 10px; background-color: rgba(255,255,255,0.3); border: none; border-radius: 15px; color: white; cursor: pointer;">
-                    <option value="3">Easy (3×3)</option>
-                    <option value="4" selected>Medium (4×4)</option>
-                    <option value="5">Hard (5×5)</option>
-                </select>
-            </div>
-        </div>
-        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;">
-            <div style="background-color: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; display: flex; align-items: center;">
-                <span style="margin-right: 10px;">Moves:</span>
-                <span id="moveCounter" style="font-weight: bold; font-size: 1.2rem;">0</span>
-            </div>
-            <div style="background-color: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; display: flex; align-items: center;">
-                <span style="margin-right: 10px;">Time:</span>
-                <span id="timeCounter" style="font-weight: bold; font-size: 1.2rem;">00:00</span>
-            </div>
-        </div>
+<body>
+    <h1>Life is a cycle</h1> 
+    <p class="instruction-text">Click the emoji!</p> 
+    <div class="emoji-container">
+        <input type="radio" name="stage" id="s1" checked><input type="radio" name="stage" id="s2"><input type="radio" name="stage" id="s3"><input type="radio" name="stage" id="s4">
+        <label for="s1" id="l1"><span class="emoji">👶</span></label><label for="s2" id="l2"><span class="emoji">👦</span></label><label for="s3" id="l3"><span class="emoji">👨</span></label><label for="s4" id="l4"><span class="emoji">👴</span></label>
     </div>
-    
-    <div id="gameContainer" style="position: relative; width: 300px; height: 300px; background-color: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.2); user-select: none;">
-        <!-- Tiles will be inserted here by JavaScript -->
-    </div>
-    
-    <div id="imagePreview" style="margin-top: 20px; padding: 10px; background-color: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; transition: all 0.3s ease;">
-        <p style="margin: 0; font-size: 0.9rem; margin-bottom: 5px;">👁️ Show Image Preview</p>
-        <img id="previewImage" src="/api/placeholder/300/300" alt="Target image" style="width: 150px; border-radius: 5px; display: none; transition: all 0.3s ease;">
-    </div>
-    
-    <div id="winModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100;">
-        <div style="background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%); padding: 30px; border-radius: 15px; text-align: center; max-width: 90%; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            <h2 style="margin-top: 0;">🎉 Puzzle Completed! 🎉</h2>
-            <p style="margin-bottom: 5px;">You solved it in:</p>
-            <p style="font-size: 1.2rem; margin: 5px 0;"><strong id="finalMoves">0</strong> moves</p>
-            <p style="font-size: 1.2rem; margin: 5px 0;"><strong id="finalTime">00:00</strong> time</p>
-            <button id="newGameBtn" style="margin-top: 20px; padding: 10px 25px; background-color: #4CAF50; color: white; border: none; border-radius: 30px; cursor: pointer; font-size: 1.1rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;">Play Again</button>
-        </div>
-    </div>
-    
-    <script>
-        // Game state variables
-        let grid = [];
-        let gridSize = 4; // Default
-        let emptyTile = { row: 0, col: 0 };
-        let moveCount = 0;
-        let gameStarted = false;
-        let timer = null;
-        let seconds = 0;
-        
-        // DOM Elements
-        const gameContainer = document.getElementById('gameContainer');
-        const moveCounter = document.getElementById('moveCounter');
-        const timeCounter = document.getElementById('timeCounter');
-        const startBtn = document.getElementById('startBtn');
-        const difficultySelect = document.getElementById('difficultySelect');
-        const winModal = document.getElementById('winModal');
-        const finalMoves = document.getElementById('finalMoves');
-        const finalTime = document.getElementById('finalTime');
-        const newGameBtn = document.getElementById('newGameBtn');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImage = document.getElementById('previewImage');
-        
-        // Placeholder image URLs
-        const imageOptions = [
-            '/api/placeholder/300/300',
-            '/api/placeholder/300/300',
-            '/api/placeholder/300/300'
-        ];
-        
-        // Current game image
-        let currentImage = imageOptions[0];
-        
-        // Initialize game
-        function initGame() {
-            // Clear existing game
-            stopTimer();
-            gameContainer.innerHTML = '';
-            moveCount = 0;
-            seconds = 0;
-            moveCounter.textContent = moveCount;
-            timeCounter.textContent = '00:00';
-            
-            // Get selected grid size
-            gridSize = parseInt(difficultySelect.value);
-            
-            // Adjust game container size based on viewport
-            const maxSize = Math.min(window.innerWidth * 0.9, 500);
-            gameContainer.style.width = `${maxSize}px`;
-            gameContainer.style.height = `${maxSize}px`;
-            
-            // Randomly select an image
-            currentImage = imageOptions[Math.floor(Math.random() * imageOptions.length)];
-            previewImage.src = currentImage;
-            
-            // Create grid and tile positions
-            grid = [];
-            let tileCount = gridSize * gridSize;
-            let positions = Array.from({length: tileCount - 1}, (_, i) => i + 1);
-            positions.push(0); // Add empty tile
-            
-            // Shuffle positions to create solvable puzzle
-            positions = createSolvablePuzzle(positions);
-            
-            // Create grid representation
-            for (let i = 0; i < gridSize; i++) {
-                grid[i] = [];
-                for (let j = 0; j < gridSize; j++) {
-                    let index = i * gridSize + j;
-                    grid[i][j] = positions[index];
-                    
-                    // Track empty tile position
-                    if (grid[i][j] === 0) {
-                        emptyTile = { row: i, col: j };
-                    }
-                }
-            }
-            
-            // Create tiles in the UI
-            renderTiles();
-            
-            // Start game
-            gameStarted = true;
-            startTimer();
-        }
-        
-        // Create a solvable puzzle arrangement
-        function createSolvablePuzzle(positions) {
-            // Helper function to check if puzzle is solvable
-            function isSolvable(arr) {
-                let inversions = 0;
-                let emptyRow = Math.floor(arr.indexOf(0) / gridSize) + 1;
-                
-                for (let i = 0; i < arr.length - 1; i++) {
-                    if (arr[i] === 0) continue;
-                    
-                    for (let j = i + 1; j < arr.length; j++) {
-                        if (arr[j] === 0) continue;
-                        if (arr[i] > arr[j]) inversions++;
-                    }
-                }
-                
-                if (gridSize % 2 === 1) {
-                    return inversions % 2 === 0;
-                } else {
-                    return (inversions + emptyRow) % 2 === 1;
-                }
-            }
-            
-            // Shuffle and check until we get a solvable configuration
-            do {
-                // Fisher-Yates shuffle
-                for (let i = positions.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [positions[i], positions[j]] = [positions[j], positions[i]];
-                }
-            } while (!isSolvable(positions));
-            
-            return positions;
-        }
-        
-        // Render tiles based on current grid
-        function renderTiles() {
-            gameContainer.innerHTML = '';
-            const tileSize = Math.floor(parseInt(gameContainer.style.width) / gridSize);
-            
-            for (let i = 0; i < gridSize; i++) {
-                for (let j = 0; j < gridSize; j++) {
-                    const value = grid[i][j];
-                    
-                    if (value !== 0) { // Skip empty tile
-                        const tile = document.createElement('div');
-                        
-                        // Calculate original position for background image
-                        const originalRow = Math.floor((value - 1) / gridSize);
-                        const originalCol = (value - 1) % gridSize;
-                        
-                        // Calculate background position
-                        const bgPosX = -(originalCol * (100 / (gridSize - 1))) + '%';
-                        const bgPosY = -(originalRow * (100 / (gridSize - 1))) + '%';
-                        
-                        // Add styling
-                        tile.style.cssText = `
-                            position: absolute;
-                            width: ${tileSize - 4}px;
-                            height: ${tileSize - 4}px;
-                            left: ${j * tileSize + 2}px;
-                            top: ${i * tileSize + 2}px;
-                            background-image: url('${currentImage}');
-                            background-size: ${gridSize * 100}%;
-                            background-position: ${bgPosX} ${bgPosY};
-                            border-radius: 5px;
-                            cursor: pointer;
-                            transition: all 0.2s ease;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                            border: 2px solid rgba(255,255,255,0.5);
-                        `;
-                        
-                        // Add number overlay
-                        const overlay = document.createElement('div');
-                        overlay.style.cssText = `
-                            background-color: rgba(0,0,0,0.3);
-                            color: white;
-                            width: 100%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            font-size: ${tileSize / 3}px;
-                            font-weight: bold;
-                            border-radius: 5px;
-                        `;
-                        overlay.textContent = value;
-                        tile.appendChild(overlay);
-                        
-                        // Add click event
-                        tile.addEventListener('click', () => {
-                            if (!gameStarted) return;
-                            
-                            const tileCoords = { row: i, col: j };
-                            moveTile(tileCoords);
-                        });
-                        
-                        gameContainer.appendChild(tile);
-                    }
-                }
-            }
-        }
-        
-        // Handle tile movement
-        function moveTile(tileCoords) {
-            // Check if move is valid (adjacent to empty tile)
-            if (isAdjacent(tileCoords, emptyTile)) {
-                // Get value of clicked tile
-                const tileValue = grid[tileCoords.row][tileCoords.col];
-                
-                // Swap with empty tile
-                grid[emptyTile.row][emptyTile.col] = tileValue;
-                grid[tileCoords.row][tileCoords.col] = 0;
-                
-                // Update empty tile position
-                emptyTile = { ...tileCoords };
-                
-                // Update moves counter
-                moveCount++;
-                moveCounter.textContent = moveCount;
-                
-                // Re-render tiles
-                renderTiles();
-                
-                // Check if puzzle is solved
-                if (isPuzzleSolved()) {
-                    gameWon();
-                }
-            }
-        }
-        
-        // Check if two tiles are adjacent
-        function isAdjacent(tile1, tile2) {
-            const rowDiff = Math.abs(tile1.row - tile2.row);
-            const colDiff = Math.abs(tile1.col - tile2.col);
-            
-            // Tiles are adjacent if they differ by 1 in either row or column (but not both)
-            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-        }
-        
-        // Check if puzzle is solved
-        function isPuzzleSolved() {
-            // Check if empty tile is at the bottom right
-            if (emptyTile.row !== gridSize - 1 || emptyTile.col !== gridSize - 1) {
-                return false;
-            }
-            
-            // Check if all other tiles are in correct position
-            let expectedValue = 1;
-            for (let i = 0; i < gridSize; i++) {
-                for (let j = 0; j < gridSize; j++) {
-                    // Skip bottom right cell
-                    if (i === gridSize - 1 && j === gridSize - 1) continue;
-                    
-                    if (grid[i][j] !== expectedValue) {
-                        return false;
-                    }
-                    expectedValue++;
-                }
-            }
-            
-            return true;
-        }
-        
-        // Start the timer
-        function startTimer() {
-            if (timer) clearInterval(timer);
-            
-            timer = setInterval(() => {
-                seconds++;
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                timeCounter.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-            }, 1000);
-        }
-        
-        // Stop the timer
-        function stopTimer() {
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
-        }
-        
-        // Game won
-        function gameWon() {
-            stopTimer();
-            gameStarted = false;
-            
-            // Update win modal
-            finalMoves.textContent = moveCount;
-            finalTime.textContent = timeCounter.textContent;
-            
-            // Show win modal
-            winModal.style.display = 'flex';
-        }
-        
-        // Event listeners
-        startBtn.addEventListener('click', initGame);
-        newGameBtn.addEventListener('click', () => {
-            winModal.style.display = 'none';
-            initGame();
-        });
-        
-        // Preview image toggle
-        imagePreview.addEventListener('click', () => {
-            if (previewImage.style.display === 'none') {
-                previewImage.style.display = 'block';
-                imagePreview.querySelector('p').textContent = '👁️ Hide Image Preview';
-            } else {
-                previewImage.style.display = 'none';
-                imagePreview.querySelector('p').textContent = '👁️ Show Image Preview';
-            }
-        });
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (gameStarted) {
-                const maxSize = Math.min(window.innerWidth * 0.9, 500);
-                gameContainer.style.width = `${maxSize}px`;
-                gameContainer.style.height = `${maxSize}px`;
-                renderTiles();
-            }
-        });
-        
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            // Start with empty board
-            gameContainer.innerHTML = `
-                <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; text-align: center;">
-                    <p style="padding: 20px; font-size: 1.2rem;">Press 'Start New Game' to begin</p>
-                </div>
-            `;
-        });
-    </script>
+    <p class="sequence-text">Baby ➔ Boy ➔ Man ➔ Old Man</p>
 </body>
 </html>
