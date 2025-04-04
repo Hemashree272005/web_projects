@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Notes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .notes-section {
+            padding: 1.5rem;
+        }
+        
+        .input-container {
+            display: flex;
+            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+        }
+        
+        #noteInput {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+        
+        #noteInput:focus {
+            outline: none;
+            border-color: #2575fc;
+            box-shadow: 0 0 0 2px rgba(37, 117, 252, 0.2);
+        }
+        
+        button {
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        #addNoteBtn {
+            background-color: #2575fc;
+            color: white;
+        }
+        
+        #addNoteBtn:hover {
+            background-color: #1a65e0;
+        }
+        
+        #voiceBtn {
+            background-color: #6a11cb;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        #voiceBtn:hover {
+            background-color: #5a0cb6;
+        }
+        
+        #voiceBtn.listening {
+            background-color: #ff4757;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .notes-list {
+            list-style: none;
+        }
+        
+        .note-item {
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.5s;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 5px solid #2575fc;
+        }
+        
+        .note-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .note-content {
+            flex: 1;
+        }
+        
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .delete-btn, .edit-btn {
+            background-color: transparent;
+            padding: 0.4rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-btn {
+            color: #ff4757;
+        }
+        
+        .delete-btn:hover {
+            background-color: rgba(255, 71, 87, 0.1);
+        }
+        
+        .edit-btn {
+            color: #2575fc;
+        }
+        
+        .edit-btn:hover {
+            background-color: rgba(37, 117, 252, 0.1);
+        }
+        
+        .recognition-status {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 1rem;
+            height: 20px;
+        }
+        
+        .empty-notes {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .input-container {
+                flex-direction: column;
+            }
+            
+            #voiceBtn, #addNoteBtn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>Voice Notes</h1>
+        </div>
+        
+        <div class="notes-section">
+            <div class="input-container">
+                <input type="text" id="noteInput" placeholder="Type your note here...">
+                <button id="voiceBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    Voice
+                </button>
+                <button id="addNoteBtn">Add Note</button>
+            </div>
+            
+            <div class="recognition-status" id="recognitionStatus"></div>
+            
+            <ul class="notes-list" id="notesList">
+                <!-- Notes will be added here dynamically -->
+                <div class="empty-notes" id="emptyNotes">
+                    <p>No notes yet. Try adding one!</p>
+                </div>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const noteInput = document.getElementById('noteInput');
+            const addNoteBtn = document.getElementById('addNoteBtn');
+            const voiceBtn = document.getElementById('voiceBtn');
+            const notesList = document.getElementById('notesList');
+            const recognitionStatus = document.getElementById('recognitionStatus');
+            const emptyNotes = document.getElementById('emptyNotes');
+            
+            let notes = JSON.parse(localStorage.getItem('voiceNotes')) || [];
+            let editingIndex = -1;
+            let recognition;
+            
+            // Check if browser supports speech recognition
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                
+                recognition.onstart = function() {
+                    voiceBtn.classList.add('listening');
+                    recognitionStatus.textContent = "Listening...";
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = Array.from(event.results)
+                        .map(result => result[0])
+                        .map(result => result.transcript)
+                        .join('');
+                    
+                    noteInput.value = transcript;
+                    recognitionStatus.textContent = "Heard: " + transcript;
+                };
+                
+                recognition.onerror = function(event) {
+                    voiceBtn.classList.remove('listening');
+                    recognitionStatus.textContent = "Error: " + event.error;
+                };
+                
+                recognition.onend = function() {
+                    voiceBtn.classList.remove('listening');
+                    setTimeout(() => {
+                        recognitionStatus.textContent = "";
+                    }, 2000);
+                };
+                
+                voiceBtn.addEventListener('click', function() {
+                    if (voiceBtn.classList.contains('listening')) {
+                        recognition.stop();
+                    } else {
+                        recognition.start();
+                    }
+                });
+            } else {
+                voiceBtn.textContent = "Voice (Not Supported)";
+                voiceBtn.disabled = true;
+                voiceBtn.style.backgroundColor = "#ccc";
+            }
+            
+            // Render notes from local storage
+            function renderNotes() {
+                if (notes.length === 0) {
+                    emptyNotes.style.display = 'block';
+                } else {
+                    emptyNotes.style.display = 'none';
+                }
+                
+                notesList.innerHTML = '';
+                notes.forEach((note, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'note-item';
+                    
+                    listItem.innerHTML = `
+                        <div class="note-content">${note}</div>
+                        <div class="note-actions">
+                            <button class="edit-btn" data-index="${index}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="delete-btn" data-index="${index}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    
+                    notesList.appendChild(listItem);
+                });
+                
+                // Set up event listeners for edit and delete buttons
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        deleteNote(this.dataset.index);
+                    });
+                });
+                
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        editNote(this.dataset.index);
+                    });
+                });
+            }
+            
+            // Add or update a note
+            function addNote() {
+                const noteText = noteInput.value.trim();
+                if (noteText === '') return;
+                
+                if (editingIndex >= 0) {
+                    notes[editingIndex] = noteText;
+                    editingIndex = -1;
+                    addNoteBtn.textContent = 'Add Note';
+                } else {
+                    notes.push(noteText);
+                }
+                
+                localStorage.setItem('voiceNotes', JSON.stringify(notes));
+                noteInput.value = '';
+                renderNotes();
+            }
+            
+            // Edit a note
+            function editNote(index) {
+                editingIndex = index;
+                noteInput.value = notes[index];
+                noteInput.focus();
+                addNoteBtn.textContent = 'Update Note';
+            }
+            
+            // Delete a note
+            function deleteNote(index) {
+                notes.splice(index, 1);
+                localStorage.setItem('voiceNotes', JSON.stringify(notes));
+                renderNotes();
+                
+                if (editingIndex === parseInt(index)) {
+                    noteInput.value = '';
+                    editingIndex = -1;
+                    addNoteBtn.textContent = 'Add Note';
+                }
+            }
+            
+            // Event listeners
+            addNoteBtn.addEventListener('click', addNote);
+            
+            noteInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addNote();
+                }
+            });
+            
+            // Initial render
+            renderNotes();
+        });
+    </script>
+</body>
+</html>
